@@ -1,0 +1,8 @@
+.dist
+
+# individual
+*.pdf
+core
+*.txt
+*.o
+*.log
