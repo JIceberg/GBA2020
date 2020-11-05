@@ -65,13 +65,6 @@ typedef struct player {
     i8 vx;
 } Player;
 
-typedef struct portal {
-    int row;
-    int col;
-    u16 lifetime;
-    u16 color;
-} Portal;
-
 void loadGame(void);
 void playGameIteration(Player *enemy, int speed, char *level, u32 *currentButtons);
 
