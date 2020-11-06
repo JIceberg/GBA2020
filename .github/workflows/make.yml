@@ -1,0 +1,14 @@
+name: Make
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      # Execute the build.  You can specify a specific target with "--target <NAME>"
+      run: make clean |
+           make
