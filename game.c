@@ -18,6 +18,8 @@
 static Player enemies[MAX_ENEMIES];
 static Player p;
 static volatile u32 iterations = 0;
+static Portal portals[MAX_PORTALS];
+static volatile size_t num_portals = 2;
 
 /* TODO: */
 // Add any additional states you need for your app.
@@ -84,8 +86,11 @@ int main(void) {
             fillScreenDMA(BLACK);
             speed = 1;
             num_enemies = 2;
+            num_portals = 2;
             lost = 0;
             frames = 0;
+            p.col = 112;
+            p.row = 88;
             prevlost = 0;
             iterations = 0;
             loadGame();
@@ -106,7 +111,7 @@ int main(void) {
                 playGameIteration(&enemies[i], speed, str, &currentButtons);
 
                 // collision
-                if (isCollision(&p, PLAYER_WIDTH)) {
+                if (isCollision(&p, &enemies[i])) {
                     state = LOSE;
                     break;
                 }
@@ -135,6 +140,8 @@ int main(void) {
             } else if (iterations % 750 == 0 && num_enemies < MAX_ENEMIES) {
                 drawRectDMA(1, 1, 10, 10, BLACK);
                 num_enemies++;
+            } else if (iterations % 2500 == 0 && num_portals < 4) {
+                num_portals += 2;
             }
             if (iterations == 7500) {
                 state = WIN;
@@ -230,6 +237,9 @@ void loadGame(void) {
     for (size_t i = 0; i < MAX_ENEMIES; i++) {
         updateEnemyType(&enemies[i]);
     }
+    for (size_t i = 0; i < MAX_PORTALS - 1; i+=2) {
+        createPortal(&portals[i], &portals[i+1], i);
+    }
 }
 
 // a simple function to perform one enemy movement iteration
@@ -240,8 +250,13 @@ void playGameIteration(Player *enemy, int speed, char *level, u32 *currentButton
 
     // cover the player and current enemy locations
     // (instead of filling the buffer)
-    clearPlayer(enemy->row, enemy->col, 5);
     clearPlayer(p.row, p.col, 16);
+    
+    for (size_t i = 0; i < num_portals; i++) {
+        clearPlayer(portals[i].row, portals[i].col, PORTAL_SIZE);
+    }
+
+    clearPlayer(enemy->row, enemy->col, 5);
 
     // player movement button bindings
     if (KEY_DOWN(BUTTON_RIGHT, *currentButtons)) {
@@ -260,8 +275,42 @@ void playGameIteration(Player *enemy, int speed, char *level, u32 *currentButton
         p.vx = 0;
         p.vy = 1;
     }
-    updateLocation(&p, 1);
+    
+    // portal time!
+    if (iterations != 0 && iterations % 600 == 0) {
+        for (size_t i = 0; i < num_portals - 1; i+=2) {
+            enablePortalPair(&portals[i]);
+        }
+    }
+    for (size_t i = 0; i < num_portals; i++) {
+        drawPortal(&portals[i]);
 
+        // player movement button bindings
+        if (KEY_DOWN(BUTTON_RIGHT, *currentButtons)) {
+            p.vx = 1;
+            p.vy = 0;
+        } else if (KEY_DOWN(BUTTON_LEFT, *currentButtons)) {
+            p.vx = -1;
+            p.vy = 0;
+        } else if (KEY_DOWN(BUTTON_DOWN, *currentButtons)) {
+            p.vy = 2;
+            p.vx = 0;
+        } else if (KEY_DOWN(BUTTON_UP, *currentButtons)) {
+            p.vx = 0;
+            p.vy = -1;
+        } else {
+            p.vx = 0;
+            p.vy = 1;
+        }
+        if ((portals[i].lifetime > 0) && (atPortal(&portals[i], &p) == 1)) {
+            portals[i].lifetime = 0;
+            portals[i].pair->lifetime = 0;
+            p.col = portals[i].pair->col;
+            p.row = portals[i].pair->row;
+        }
+    }
+    
+    updateLocation(&p, 1);
     // prevent player from leaving the screen
     if (!((p.col < 240-16 && p.row < 160-16) && (p.col > 8 && p.row > 8))) {
         updateLocation(&p, -1);
@@ -281,3 +330,10 @@ void playGameIteration(Player *enemy, int speed, char *level, u32 *currentButton
     // draw the current level in the top left corner
     drawString(1, 1, level, WHITE);
 }
+
+void drawPortal(Portal *portal) {
+    if (portal->lifetime > 0) {
+        drawRectDMA(portal->row, portal->col, PORTAL_SIZE, PORTAL_SIZE, portal->color);
+        portal->lifetime = portal->lifetime - 1;
+    }
+} 

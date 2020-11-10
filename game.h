@@ -65,7 +65,21 @@ typedef struct player {
     i8 vx;
 } Player;
 
+typedef struct coord_pair {
+    int x;
+    int y;
+} coord_pair;
+
+typedef struct portal {
+    int row;
+    int col;
+    struct portal *pair;
+    u32 lifetime;
+    u16 color;
+} Portal;
+
 void loadGame(void);
 void playGameIteration(Player *enemy, int speed, char *level, u32 *currentButtons);
+void drawPortal(Portal *portal);
 
 #endif

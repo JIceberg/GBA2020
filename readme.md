@@ -58,6 +58,8 @@ The number of rebounds performed is dependent upon the enemy's speed. If the ene
 rebound, they will respawn with a random movement type in the constrained spawn position.
 Again, there is a delay between being spawned and beginning movement.
 
+Sometimes, portals appear!
+
 ### Strategy
 Understanding how the behavior of the enemies works is key to victory.
 

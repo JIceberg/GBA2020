@@ -6,3 +6,4 @@ core
 *.txt
 *.o
 *.log
+*.tar.gz
