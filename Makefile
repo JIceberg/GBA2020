@@ -28,7 +28,7 @@ all : LDFLAGS += $(LDRELEASE)
 all: $(PROGNAME).gba
 	@echo "[FINISH] Created $(PROGNAME).gba"
 
-include /opt/cs2110-tools/GBAVariables.mak
+# include /opt/cs2110-tools/GBAVariables.mak
 
 # Son, it's time to be an adult and use adult prototypes
 CFLAGS += -Wstrict-prototypes -Wold-style-definition
