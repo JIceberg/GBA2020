@@ -47,7 +47,7 @@ int main(void) {
     GBAState previousState = state;
 
     size_t num_enemies = 2;
-    int speed;
+    int speed = 0;
     u32 high_score = 0;
     u8 lost, prevlost;
     u32 frames;
